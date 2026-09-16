@@ -1,0 +1,230 @@
+/*
+ * Document-wide baseline (reset / normalize style). No utility classes.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-break: strict;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+img,
+picture {
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+}
+
+button {
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+code {
+  margin: 1rem 0;
+  display: block;
+  font-family: monospace;
+  font-size: 0.8em;
+  background-color: #f0f0f0;
+  padding: 1rem;
+  white-space: pre-wrap;
+}
+
+/**
+ * App Layout
+ */
+
+body {
+  background-color: #fafafa;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  --layout-main-width: min(100rem, 100vw);
+  --layout-main-padding: 2rem;
+}
+
+@scope (body) to (main, dialog) {
+  header {
+    flex: none;
+    height: 4rem;
+    padding: 0 max(calc(50vw - var(--layout-main-width) / 2), var(--layout-main-padding));
+    background-color: canvas;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  footer {
+    flex: none;
+    height: 4rem;
+    width: var(--layout-main-width);
+    padding: 0 var(--layout-main-padding);
+    margin: 0 auto;
+    background-color: canvas;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid #e0e0e0;
+  }
+}
+
+main {
+  flex: auto;
+  display: flow-root;
+  width: var(--layout-main-width);
+  padding: 0 var(--layout-main-padding);
+  margin: 0 auto;
+  background-color: canvas;
+
+  &::before {
+    content: '';
+    display: block;
+    margin-bottom: 2rem;
+  }
+
+  &::after {
+    content: '';
+    display: block;
+    margin-top: 5rem;
+  }
+}
+
+/**
+ * Form
+ */
+@scope (form) to (dialog, [popover], [role]) {
+  fieldset {
+    margin: 1rem 0;
+    padding-top: 0;
+  }
+
+  label[for] {
+    display: block;
+    margin: 0.5rem 0 0.1rem;
+
+    &:not(:has(input[type='checkbox'], input[type='radio'])) {
+      font-size: 0.8em;
+    }
+  }
+
+  textarea {
+    display: block;
+    width: stretch;
+    resize: vertical;
+  }
+
+  div[role='group'] {
+    width: stretch;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  span[role='group'] {
+    display: inline-flex;
+  }
+}
+
+/**
+ * Dialog
+ */
+dialog {
+  width: min(32rem, calc(100vw - 2rem));
+  padding: 0 1rem;
+
+  &::before {
+    content: '';
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  &::after {
+    content: '';
+    display: block;
+    margin-top: 1rem;
+  }
+
+  [command='close'][aria-label] {
+    float: right;
+    width: 1lh;
+    box-sizing: content-box;
+    padding: 0;
+  }
+
+  footer {
+    margin: 1rem 0 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}
+
+/**
+ * Toast
+ */
+[popover='manual'] {
+  margin: 0 auto;
+  inset: auto;
+  position: fixed;
+  inset: max(1rem, env(safe-area-inset-top, 0px)) 0 auto;
+  translate: 0 var(--toast-offset-y, 0px);
+  width: min(28rem, calc(100vw - 2rem));
+  padding: 0.6rem 0.6rem 0.6rem 0.8rem;
+
+  &::backdrop {
+    display: none;
+  }
+
+  &[role='alert'] {
+    border-color: #dc2626;
+  }
+
+  [popovertargetaction='hide'][aria-label] {
+    float: right;
+    width: 1lh;
+    height: 1lh;
+    padding: 0;
+    display: grid;
+    place-content: center;
+  }
+}
