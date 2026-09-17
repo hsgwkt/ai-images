@@ -52,12 +52,6 @@
     return loraSettings[filePath]?.triggerWord ?? [0]
   }
 
-  function settingsBadge(lora: Model) {
-    const strength = loraSettings[lora.filePath]?.strength ?? 1
-    const total = lora.triggerWords.length
-    return strength === 1 ? String(total) : `${strength} ${total}`
-  }
-
   function toggleTriggerGroup(filePath: string, groupIndex: number) {
     const settings = ensureSettings(filePath)
     const index = settings.triggerWord.indexOf(groupIndex)
@@ -76,6 +70,7 @@
         {@const id = sanitizeId(lora.filePath)}
         {@const settings = loraSettings[lora.filePath]}
         {@const name = withoutExt(lora.fileName)}
+        {@const strength = settings?.strength ?? 1}
         <div class={['lora', selectedSet.has(lora.filePath) && 'on']}>
           <input
             class="on"
@@ -90,7 +85,7 @@
             style:anchor-name="--{uid}-strength-{id}"
             commandfor="{uid}-settings-{id}"
             command="toggle-popover"
-            aria-label="重みとトリガー">{settingsBadge(lora)}</button
+            aria-label="重みとトリガー"><span class="tag">🏷️</span>{lora.triggerWords.length}</button
           >
           <button type="button" class="select" title={name} onclick={() => selectExclusive(lora, folderLoras ?? [])}>
             <img
@@ -101,7 +96,9 @@
                 if (e.currentTarget instanceof HTMLImageElement) e.currentTarget.src = blankImageUrl
               }}
             />
-            <span>{name}</span>
+            <span>
+              <span class="name">{name}</span>{#if strength !== 1}<span class="weight">:{strength}</span>{/if}
+            </span>
           </button>
           <div id="{uid}-settings-{id}" class="settings" popover style:position-anchor="--{uid}-strength-{id}">
             <label>
@@ -169,7 +166,7 @@
     top: 0.1rem;
     right: 0.1rem;
     margin: 0;
-    padding: 0 0.25rem;
+    padding: 0 0.15rem;
     border: none;
     border-radius: 0.2rem;
     color: #fff;
@@ -178,6 +175,12 @@
     white-space: nowrap;
     text-align: right;
     font-variant-numeric: tabular-nums;
+
+    .tag {
+      display: inline-block;
+      zoom: 0.9;
+      filter: grayscale(1);
+    }
   }
 
   .select {
@@ -201,19 +204,28 @@
     border-radius: 0.1rem;
   }
 
-  .select span {
+  .select > span {
     position: absolute;
     inset: auto 0 0;
+    display: flex;
     color: #fff;
     background-color: rgba(0, 0, 0, 0.5);
     line-height: 1.1;
     max-height: 1lh;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     box-sizing: content-box;
     padding: 0.1rem;
+    justify-content: center;
+  }
+
+  .select .name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .select .weight {
+    flex-shrink: 0;
   }
 
   .settings {

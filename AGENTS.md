@@ -238,10 +238,10 @@ ComfyUI 本体の API から一覧を取得し、トリガーワードのみ LoR
 ComfyUI の LoRA 全件を常時表示する。追加ポップオーバーや選択済みの別リストは持たない。
 
 - **グループ**: フォルダごとに区切る（フォルダ名昇順。空フォルダ名の見出しは出さない）。区切り内の並びは ComfyUI の取得順（`modified` 降順）。
-- **タイル**: プレビュー画像（なければ blank 画像）+ ファイル名（1 行省略、本体に `title` で全文）。生成に使う ON/OFF は次の 2 操作。
+- **タイル**: プレビュー画像（なければ blank 画像）+ ファイル名（1 行省略、本体に `title` で全文）。重みが `1` 以外のときは名前の末尾に `:強度` を付ける（名前側だけ省略。例: `LoRA名...:0.8`）。生成に使う ON/OFF は次の 2 操作。
   - タイル本体クリック: そのフォルダ内ではその 1 件だけ ON。すでに ON なら OFF。他フォルダの選択は維持。
   - 左上のチェックボックス: その 1 件だけの ON/OFF。複数選択できる。
-- **重み**: 右上にトリガーグループ数を右揃えで表示。重みが `1` 以外のときだけ先頭に重みを足す（数値はそのまま。例: `3` / `0.8 4` / `0`）。クリックで設定ポップオーバーを開く（`command="toggle-popover"` + CSS Anchor）。
+- **重み**: 右上にトリガーグループ数を `🏷️` 付きで右揃え表示（例: `🏷️3`）。クリックで設定ポップオーバーを開く（`command="toggle-popover"` + CSS Anchor）。
 - **設定ポップオーバー**: 重みの数値入力（step 0.1）と、トリガーグループのチェックボックス。civitai の `trainedWords` 各エントリを 1 グループとし、グループ単位のオンオフのみ。未設定時は先頭グループだけ ON（インデックス `[0]`）。文字列の分割は括弧の深さを考慮したカンマ分割（重複排除）で、適用時にワードへ展開する。
 - **永続化**: 選択は `loras`（ON の filePath 集合）。重み・トリガーは `loraSettings`（ポップオーバーで触った filePath だけ）。OFF にしても設定は残す。未登録は OFF・重み `1`・トリガー `[0]`。
 - **適用順**: 表示と同じ（フォルダ名昇順 → 区切り内は ComfyUI の並び）。
@@ -361,6 +361,7 @@ $it has brown hair.
 
 ## 7. 開発・品質・CI
 
+- コミットメッセージと Pull Request（タイトル・本文）は日本語で書く。
 - npm scripts: `dev` / `build` / `preview` / `check`（svelte-check）/ `check:watch` / `lint`（prettier --check + eslint）/ `format` / `gen:comfyui_openapi` / `update`（npm-check-updates）。
 - Prettier + ESLint（typescript-eslint, eslint-plugin-svelte, eslint-config-prettier）。
 - GitHub Actions（push/PR to main）: `npm ci` → `npm run lint` と `npm run check` を並列ジョブで実行。
