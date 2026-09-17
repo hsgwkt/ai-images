@@ -24,15 +24,15 @@ AI画像生成を支援するブラウザアプリの要件仕様。
 
 ## 2. 技術スタック・動作環境
 
-| 項目           | 内容                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------- |
-| フレームワーク | SvelteKit / Svelte 5（runes モード強制、`experimental.async: true`）                  |
-| ビルド         | Vite / `@sveltejs/adapter-static`（GitHub Pages。`BASE_PATH` で `paths.base`）        |
-| 言語           | TypeScript                                                                            |
-| バリデーション | Zod v4                                                                                |
-| ComfyUI API    | `openapi-fetch` + Comfy-Org 公開の OpenAPI 定義（`openapi-cloud.yaml`）から生成した型 |
-| Node.js        | v24（`.node-version`）                                                                |
-| 対象ブラウザ   | 最新 Chrome 前提。以下の新しめの API を使用する                                       |
+| 項目           | 内容                                                                                                                                                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| フレームワーク | SvelteKit / Svelte 5（runes モード強制、`experimental.async: true`）                                                                                                                                       |
+| ビルド         | Vite / `@sveltejs/adapter-static`（GitHub Pages。`BASE_PATH` で `paths.base`）。CSS minify は Lightning CSS。`light-dark()` はポリフィルせず `css.lightningcss.exclude` で `Features.LightDark` を除外する |
+| 言語           | TypeScript                                                                                                                                                                                                 |
+| バリデーション | Zod v4                                                                                                                                                                                                     |
+| ComfyUI API    | `openapi-fetch` + Comfy-Org 公開の OpenAPI 定義（`openapi-cloud.yaml`）から生成した型                                                                                                                      |
+| Node.js        | v24（`.node-version`）                                                                                                                                                                                     |
+| 対象ブラウザ   | 最新 Chrome 前提。以下の新しめの API を使用する                                                                                                                                                            |
 
 前提とするブラウザ API:
 
@@ -366,7 +366,7 @@ $it has brown hair.
 - Prettier + ESLint（typescript-eslint, eslint-plugin-svelte, eslint-config-prettier）。
 - GitHub Actions（push/PR to main）: `npm ci` → `npm run lint` と `npm run check` を並列ジョブで実行。
 - GitHub Pages: `main` への push（または `workflow_dispatch`）で `deploy.yml` が `BASE_PATH=/<repo>` 付きで `npm run build` し、Pages に公開する。リポジトリの Pages ソースは GitHub Actions。
-- Vite dev サーバーは `.trycloudflare.com` を `allowedHosts` に許可（トンネル経由の動作確認用）。
+- Vite: `css.lightningcss.exclude` で `Features.LightDark` を指定し、`light-dark()` の下位変換を無効化。dev サーバーは `.trycloudflare.com` を `allowedHosts` に許可（トンネル経由の動作確認用）。
 
 ## 8. アセット
 
