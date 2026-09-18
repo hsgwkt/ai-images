@@ -211,7 +211,7 @@
 
   <div>
     <form {onsubmit}>
-      <label for="">Lora</label>
+      <label for="">LoRA</label>
       <LorasSettings bind:selected={genImageInputs.state.loras} bind:loraSettings={genImageInputs.state.loraSettings} {loras} />
     </form>
   </div>

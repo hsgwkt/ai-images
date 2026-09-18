@@ -48,6 +48,14 @@
     selected.push(lora.filePath)
   }
 
+  function handleSelect(event: MouseEvent, lora: Model, folderLoras: Model[]) {
+    if (event.ctrlKey || event.shiftKey) {
+      toggleSelected(lora.filePath, !selected.includes(lora.filePath))
+      return
+    }
+    selectExclusive(lora, folderLoras)
+  }
+
   function triggerIndexes(filePath: string) {
     return loraSettings[filePath]?.triggerWord ?? [0]
   }
@@ -57,6 +65,13 @@
     const index = settings.triggerWord.indexOf(groupIndex)
     if (index < 0) settings.triggerWord.push(groupIndex)
     else settings.triggerWord.splice(index, 1)
+  }
+
+  function focusStrengthInput(event: ToggleEvent) {
+    if (event.newState !== 'open') return
+    const popover = event.currentTarget
+    if (!(popover instanceof HTMLElement)) return
+    queueMicrotask(() => popover.querySelector('input')?.focus())
   }
 </script>
 
@@ -72,22 +87,37 @@
         {@const name = withoutExt(lora.fileName)}
         {@const strength = settings?.strength ?? 1}
         <div class={['lora', selectedSet.has(lora.filePath) && 'on']}>
-          <input
-            class="on"
-            type="checkbox"
-            checked={selectedSet.has(lora.filePath)}
-            aria-label={name}
-            onchange={(e) => toggleSelected(lora.filePath, e.currentTarget.checked)}
-          />
           <button
             type="button"
-            class="strength"
+            class="badge strength"
             style:anchor-name="--{uid}-strength-{id}"
-            commandfor="{uid}-settings-{id}"
+            commandfor="{uid}-strength-{id}"
             command="toggle-popover"
-            aria-label="重みとトリガー"><span class="tag">🏷️</span>{lora.triggerWords.length}</button
+            aria-label="強度">{strength}</button
           >
-          <button type="button" class="select" title={name} onclick={() => selectExclusive(lora, folderLoras ?? [])}>
+          {#if lora.triggerWords.length > 0}
+            <button
+              type="button"
+              class="badge triggers"
+              style:anchor-name="--{uid}-triggers-{id}"
+              commandfor="{uid}-triggers-{id}"
+              command="toggle-popover"
+              aria-label="トリガー"><span class="tag">🏷️</span>{lora.triggerWords.length}</button
+            >
+            <div id="{uid}-triggers-{id}" class="settings trigger-settings" popover style:position-anchor="--{uid}-triggers-{id}">
+              {#each lora.triggerWords as triggerGroup, groupIndex (triggerGroup)}
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={triggerIndexes(lora.filePath).includes(groupIndex)}
+                    onchange={() => toggleTriggerGroup(lora.filePath, groupIndex)}
+                  />
+                  {splitTriggerWords(triggerGroup).join(', ') || triggerGroup}
+                </label>
+              {/each}
+            </div>
+          {/if}
+          <button type="button" class="select" title={name} onclick={(e) => handleSelect(e, lora, folderLoras ?? [])}>
             <img
               src={lora.previewUrl || blankImageUrl}
               alt=""
@@ -96,11 +126,15 @@
                 if (e.currentTarget instanceof HTMLImageElement) e.currentTarget.src = blankImageUrl
               }}
             />
-            <span>
-              <span class="name">{name}</span>{#if strength !== 1}<span class="weight">:{strength}</span>{/if}
-            </span>
+            <span class="name">{name}</span>
           </button>
-          <div id="{uid}-settings-{id}" class="settings" popover style:position-anchor="--{uid}-strength-{id}">
+          <div
+            id="{uid}-strength-{id}"
+            class="settings strength-settings"
+            popover
+            style:position-anchor="--{uid}-strength-{id}"
+            ontoggle={focusStrengthInput}
+          >
             <label>
               Strength
               <input
@@ -117,16 +151,6 @@
                 }}
               />
             </label>
-            {#each lora.triggerWords as triggerGroup, groupIndex (triggerGroup)}
-              <label>
-                <input
-                  type="checkbox"
-                  checked={triggerIndexes(lora.filePath).includes(groupIndex)}
-                  onchange={() => toggleTriggerGroup(lora.filePath, groupIndex)}
-                />
-                {splitTriggerWords(triggerGroup).join(', ') || triggerGroup}
-              </label>
-            {/each}
           </div>
         </div>
       {/each}
@@ -152,19 +176,10 @@
     font-size: 0.6em;
   }
 
-  .on[type='checkbox'] {
+  .badge {
     position: absolute;
     z-index: 1;
     top: 0.1rem;
-    left: 0.1rem;
-    margin: 0;
-  }
-
-  .strength {
-    position: absolute;
-    z-index: 1;
-    top: 0.1rem;
-    right: 0.1rem;
     margin: 0;
     padding: 0 0.15rem;
     border: none;
@@ -173,8 +188,29 @@
     background-color: rgba(0, 0, 0, 0.6);
     line-height: 1.4;
     white-space: nowrap;
-    text-align: right;
     font-variant-numeric: tabular-nums;
+  }
+
+  .strength {
+    left: 0.1rem;
+    min-width: 1.4em;
+
+    .on & {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+  }
+
+  .triggers {
+    right: 0.1rem;
+    text-align: right;
+
+    .on & {
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0;
+      border-top-left-radius: 0;
+    }
 
     .tag {
       display: inline-block;
@@ -190,9 +226,16 @@
     padding: 0;
   }
 
-  .lora.on .select {
-    outline: 2px solid highlight;
-    outline-offset: -2px;
+  .lora.on {
+    .select {
+      outline: 2px solid highlight;
+      outline-offset: -2px;
+    }
+
+    .badge,
+    .select .name {
+      background-color: rgb(from highlight r g b / 80%);
+    }
   }
 
   img {
@@ -204,33 +247,23 @@
     border-radius: 0.1rem;
   }
 
-  .select > span {
+  .select .name {
     position: absolute;
     inset: auto 0 0;
-    display: flex;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     color: #fff;
     background-color: rgba(0, 0, 0, 0.5);
     line-height: 1.1;
     max-height: 1lh;
     box-sizing: content-box;
     padding: 0.1rem;
-    justify-content: center;
-  }
-
-  .select .name {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .select .weight {
-    flex-shrink: 0;
+    text-align: center;
   }
 
   .settings {
     margin: 0;
-    position-area: bottom span-left;
     position-try-fallbacks: flip-block, flip-inline;
     width: max(12rem, anchor-size(width));
     padding: 0.5rem;
@@ -246,5 +279,13 @@
     input[type='number'] {
       width: 4rem;
     }
+  }
+
+  .strength-settings {
+    position-area: bottom span-right;
+  }
+
+  .trigger-settings {
+    position-area: bottom span-left;
   }
 </style>
