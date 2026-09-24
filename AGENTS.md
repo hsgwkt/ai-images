@@ -119,12 +119,12 @@ Record<string, {
     strength: number        // min 0, catch: 1
     triggerWord: number[]   // 有効な trainedWords グループのインデックス。catch: [0]
   }>                        // ポップオーバーで触った LoRA だけ。未登録は strength 1 / triggerWord [0]
-  positivePrompt: string    // catch: '1girl, blush, light_smile,'
+  positivePrompt: string    // catch: ''
   negativePrompt: string    // catch: ''
   randomSeed: boolean       // catch: true
   seed: number              // int >= 0, catch: 0
   baseSize: '1024' | '1280' | '1536'          // catch: '1024'
-  aspectRatio: '2:3' | '1:1' | '3:2' | '16:9' // catch: '2:3'
+  aspectRatio: '9:16' | '2:3' | '1:1' | '3:2' | '16:9' // catch: '2:3'
   steps: '1/3' | '2/3' | '1' | '1.5' | '2'    // catch: '1'
 }
 ```
